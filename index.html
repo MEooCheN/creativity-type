@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="20 道题，测出你的创造力是哪种形状。娱乐性自评，非心理测量工具。">
+<meta name="theme-color" content="#0b0b10">
+<title>你的创造力是哪种形状</title>
+<style>
+  :root{
+    --bg:#0b0b10;
+    --bg2:#141026;
+    --fg:#f2f2f7;
+    --dim:#9a9aab;
+    --dim2:#6b6b7d;
+    --line:rgba(255,255,255,.10);
+    --card:rgba(255,255,255,.045);
+    --accent:#7c6cff;
+    --accent2:#39d0c8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.6;
+    overscroll-behavior-y:contain;
+  }
+  #app{
+    max-width:600px;margin:0 auto;min-height:100vh;min-height:100dvh;
+    padding:calc(env(safe-area-inset-top) + 22px) 22px calc(env(safe-area-inset-bottom) + 28px);
+    display:flex;flex-direction:column;
+  }
+  .screen{display:none;flex:1;flex-direction:column}
+  .screen.on{display:flex;animation:fade .32s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:27px;line-height:1.35;margin:0 0 14px;letter-spacing:.3px}
+  h2{font-size:20px;margin:0 0 10px}
+  p{margin:0 0 14px}
+  .muted{color:var(--dim);font-size:14.5px}
+  .tiny{color:var(--dim2);font-size:12px;line-height:1.55}
+  .accent{color:var(--accent2)}
+
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;min-height:56px;padding:16px 18px;border:none;border-radius:16px;
+    font-size:17px;font-weight:600;color:#fff;cursor:pointer;
+    background:linear-gradient(135deg,var(--accent),#4a3fd0);
+    box-shadow:0 8px 26px rgba(124,108,255,.28);
+    transition:transform .12s ease,opacity .2s ease;
+    font-family:inherit;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn.ghost{
+    background:transparent;color:var(--fg);box-shadow:none;
+    border:1px solid var(--line);
+  }
+  .btn.ghost:active{background:rgba(255,255,255,.05)}
+  .spacer{flex:1}
+
+  /* ---------- intro ---------- */
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12.5px;letter-spacing:2px;color:var(--dim2);text-transform:uppercase;
+    margin-bottom:18px;
+  }
+  .kicker::before{content:"";width:22px;height:1px;background:var(--accent2)}
+  .hero{font-size:34px;line-height:1.3;font-weight:700;margin:0 0 16px;letter-spacing:.5px}
+  .hero em{font-style:normal;background:linear-gradient(120deg,var(--accent2),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .facts{display:flex;gap:18px;margin:6px 0 26px;color:var(--dim);font-size:13.5px}
+  .facts b{color:var(--fg);font-weight:600}
+
+  /* ---------- quiz ---------- */
+  .qtop{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .bar{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.09);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .3s ease}
+  .count{font-size:12.5px;color:var(--dim2);font-variant-numeric:tabular-nums;min-width:42px;text-align:right}
+  .qtext{font-size:23px;line-height:1.5;font-weight:650;margin:0 0 26px;letter-spacing:.2px}
+  .opts{display:flex;flex-direction:column;gap:12px}
+  .opt{
+    text-align:left;width:100%;padding:18px 18px;border-radius:16px;
+    border:1px solid var(--line);background:var(--card);color:var(--fg);
+    font-size:16.5px;line-height:1.55;font-family:inherit;cursor:pointer;
+    transition:background .16s ease,border-color .16s ease,transform .1s ease;
+  }
+  .opt:active{transform:scale(.99)}
+  .opt.sel{background:rgba(124,108,255,.16);border-color:rgba(124,108,255,.65)}
+  .opt.self{border-style:dashed;color:var(--dim)}
+  .opt small{display:block;color:var(--dim2);font-size:12px;margin-top:6px}
+  .back{
+    align-self:flex-start;margin-top:22px;background:none;border:none;
+    color:var(--dim2);font-size:13.5px;font-family:inherit;cursor:pointer;padding:6px 0;
+  }
+  .freerow{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+  .freerow input{
+    width:100%;padding:15px 16px;border-radius:14px;border:1px solid var(--line);
+    background:rgba(255,255,255,.04);color:var(--fg);font-size:16px;font-family:inherit;
+  }
+  .freerow input::placeholder{color:var(--dim2)}
+  .freerow input:focus{outline:none;border-color:rgba(124,108,255,.6)}
+
+  /* ---------- result ---------- */
+  .code{
+    font-size:15px;letter-spacing:6px;color:var(--dim2);margin-bottom:6px;font-weight:600;
+  }
+  .name{font-size:40px;font-weight:750;line-height:1.2;margin:0 0 16px;letter-spacing:1px}
+  .verdict{font-size:19px;line-height:1.65;color:#e8e8f0;margin:0 0 8px;font-weight:500}
+  .radarwrap{display:flex;justify-content:center;margin:14px 0 6px}
+  .langrid{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:6px 0 4px;font-size:13px;color:var(--dim)}
+  .langrid b{color:var(--fg);font-weight:600;white-space:nowrap}
+  .block{border-top:1px solid var(--line);padding:16px 0 2px;margin-top:6px}
+  .block h3{font-size:12.5px;letter-spacing:2px;color:var(--dim2);margin:0 0 8px;font-weight:600;text-transform:uppercase}
+  .block p{font-size:16px;margin:0 0 6px;line-height:1.6}
+  .quote{
+    margin:12px 0 0;padding:14px 16px;border-left:2px solid var(--accent2);
+    background:rgba(57,208,200,.07);border-radius:0 12px 12px 0;font-size:15.5px;color:#dcdceb;
+  }
+  .quote span{display:block;font-size:11.5px;letter-spacing:1.5px;color:var(--dim2);margin-bottom:6px}
+  .acts{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+
+  /* ---------- share card layer ---------- */
+  .layer{
+    position:fixed;inset:0;background:rgba(5,5,9,.94);z-index:50;
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    padding:20px;gap:14px;overflow:auto;
+  }
+  .layer.on{display:flex}
+  .layer img{max-width:100%;max-height:72vh;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .layer .hint{font-size:13px;color:var(--dim);text-align:center}
+  .layer .btn{max-width:340px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ 封面 ============ -->
+  <section id="scr-intro" class="screen on">
+    <div class="kicker">创造力剖面</div>
+    <h1 class="hero">你不是<em>有没有</em>创造力，<br>你是<em>哪一种形状</em>。</h1>
+    <p class="muted">20 道题，四个维度，八个外号。<br>不测高低，只测你脑子里那台机器是怎么运转的。</p>
+    <div class="facts">
+      <span><b>20</b> 题</span>
+      <span><b>90</b> 秒</span>
+      <span><b>8+2</b> 种结果</span>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="btn-start">开始</button>
+    <p class="tiny" style="margin-top:16px">娱乐性自评，非心理测量工具。不采集任何个人信息，不联网。</p>
+  </section>
+
+  <!-- ============ 答题 ============ -->
+  <section id="scr-quiz" class="screen">
+    <div class="qtop">
+      <div class="bar"><i id="prog"></i></div>
+      <div class="count" id="count">1 / 20</div>
+    </div>
+    <div id="qbody"></div>
+    <button class="back" id="btn-back">← 上一题</button>
+  </section>
+
+  <!-- ============ 结果 ============ -->
+  <section id="scr-result" class="screen">
+    <div class="code" id="r-code"></div>
+    <h2 class="name" id="r-name"></h2>
+    <p class="verdict" id="r-verdict"></p>
+    <div class="radarwrap"><canvas id="radar" width="320" height="320" style="width:320px;height:320px"></canvas></div>
+    <div class="langrid" id="r-lang"></div>
+    <div class="block"><h3>天赋</h3><p id="r-gift"></p></div>
+    <div class="block"><h3>盲点</h3><p id="r-blind"></p></div>
+    <div class="block"><h3>创造姿势</h3><p id="r-pose"></p></div>
+    <div id="r-quote"></div>
+    <div class="acts">
+      <button class="btn" id="btn-card">生成结果卡</button>
+      <button class="btn ghost" id="btn-copy">复制文案</button>
+      <button class="btn ghost" id="btn-retry">重新测一次</button>
+    </div>
+    <p class="tiny" style="margin-top:20px">娱乐性自评，非心理测量工具。结果只存在你自己的浏览器里。</p>
+  </section>
+
+</div>
+
+<!-- ============ 结果卡弹层 ============ -->
+<div class="layer" id="layer">
+  <img id="cardimg" alt="结果卡">
+  <div class="hint">手机上长按图片保存；电脑上右键另存。</div>
+  <button class="btn ghost" id="btn-close">关闭</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     1. 维度定义
+     L = 左极（雷达上指向上/右/下/左的顺序），R = 右极
+     ========================================================= */
+  const AXES = [
+    { id:"eng",   label:"发动机", L:{code:"F", name:"喷泉"}, R:{code:"P", name:"打磨"} },
+    { id:"src",   label:"取材",   L:{code:"N", name:"近邻"}, R:{code:"R", name:"远跳"} },
+    { id:"rule",  label:"规则",   L:{code:"W", name:"场内"}, R:{code:"B", name:"破框"} },
+    { id:"field", label:"场域",   L:{code:"I", name:"独行"}, R:{code:"C", name:"共振"} }
+  ];
+  const AX = {};
+  AXES.forEach(a => { AX[a.id] = a; });
+
+  /* =========================================================
+     2. 题库（顺序即展示顺序；axis=计入哪个维度；w=权重）
+     ========================================================= */
+  const Q = [
+    { axis:"eng", w:1, t:"一个想法刚冒出来，你更可能：", o:[
+      {t:"立刻又冒出三个，然后忘了第一个", p:"F"},
+      {t:"先把它按住，这一件做完再说", p:"P"} ]},
+
+    { axis:"src", w:1, t:"要找新点子，你会先翻：", o:[
+      {t:"你最熟的那几个领域", p:"N"},
+      {t:"一个跟你八竿子打不着的东西", p:"R"} ]},
+
+    { axis:"rule", w:1, t:"给你一个现成的模板，你：", o:[
+      {t:"在它的框架里做到最好", p:"W"},
+      {t:"先问为什么非得有这个模板", p:"B"} ]},
+
+    { axis:"field", w:1, t:"好点子通常在：", o:[
+      {t:"你一个人走路、洗澡、发呆的时候", p:"I"},
+      {t:"跟人聊到兴头上，对方说了一句话", p:"C"} ]},
+
+    { axis:"eng", w:1, t:"你手机备忘录里更像：", o:[
+      {t:"一堆没写完的句子", p:"F"},
+      {t:"几条已经勾掉的清单", p:"P"} ]},
+
+    { axis:"src", w:1, t:"你做出来的东西，灵感常来自：", o:[
+      {t:"同一件事的另一种做法", p:"N"},
+      {t:"完全另一个行业", p:"R"} ]},
+
+    { axis:"rule", w:1, t:"看到一条“行规”，你的第一反应：", o:[
+      {t:"它能稳定所有人的预期", p:"W"},
+      {t:"它多半只是历史遗留", p:"B"} ]},
+
+    { axis:"field", w:1, t:"卡住的时候，你更倾向：", o:[
+      {t:"关起门硬啃，啃不动也不叫人", p:"I"},
+      {t:"找人说两句就通了", p:"C"} ]},
+
+    { axis:"eng", w:1, t:"做事时最爽的一刻是：", special:true, o:[
+      {t:"刚开始那五分钟", p:"F"},
+      {t:"收尾那一小时", p:"P"},
+      {t:"以上都不对，我自己写一个", p:null, self:true} ]},
+
+    { axis:"src", w:1, t:"有人说你“想得远”，你心里：", o:[
+      {t:"有点心虚，我只是把身边的东西拼起来了", p:"N"},
+      {t:"说得对，我总在别处找料", p:"R"} ]},
+
+    { axis:"rule", w:1, t:"你的作品被评价“不像这一类”，你：", o:[
+      {t:"不太高兴", p:"W"},
+      {t:"这正是我想干的", p:"B"} ]},
+
+    { axis:"field", w:1, t:"你更愿意交付：", o:[
+      {t:"一个完整的东西，署名是你", p:"I"},
+      {t:"一个大家都能接着改的东西", p:"C"} ]},
+
+    { axis:"eng", w:1, t:"别人夸你，你更受用哪句：", o:[
+      {t:"“你怎么想到的？”", p:"F"},
+      {t:"“这个细节只有你会做。”", p:"P"} ]},
+
+    { axis:"src", w:1, t:"遇到真正的难题，你更可能：", o:[
+      {t:"把已知条件重新排列", p:"N"},
+      {t:"跑到一个不相干的领域去找解法", p:"R"} ]},
+
+    { axis:"rule", w:1, t:"在一个团队里，你更像：", o:[
+      {t:"把标准立起来的那个人", p:"W"},
+      {t:"把标准推翻重来的那个人", p:"B"} ]},
+
+    { axis:"eng", w:1, t:"一个项目做到 70%，你通常：", o:[
+      {t:"已经在想下一个了", p:"F"},
+      {t:"必须把它推到 95% 才安心", p:"P"} ]},
+
+    { axis:"src", w:1, t:"你收藏夹里最多的是：", o:[
+      {t:"同一主题的进阶资料", p:"N"},
+      {t:"乱七八糟、互相看不出关系的东西", p:"R"} ]},
+
+    { axis:"rule", w:1, t:"让你改一个已经很成熟的东西，你会：", o:[
+      {t:"优化它的参数", p:"W"},
+      {t:"换掉它想达到的目标", p:"B"} ]},
+
+    { axis:"eng", w:2, t:"【情境】周五下午，老板说“下周一给我点新东西”。你先：", o:[
+      {t:"打开文档，把手上三个半成品收拢成一个能交的", p:"P"},
+      {t:"打开搜索，先看十个毫不相干的东西", p:"F"} ]},
+
+    { axis:"rule", w:2, t:"【情境】有人给你一道“没有标准答案”的题。你先：", o:[
+      {t:"问清楚评分标准是什么", p:"W"},
+      {t:"把它当成一个可以被改写的问题", p:"B"} ]}
+  ];
+
+  /* =========================================================
+     3. 人格库：8 主型 + 2 彩蛋
+     ========================================================= */
+  const TYPES = {
+    FNW:{ code:"FNW", name:"便利店",
+      verdict:"你脑子里没有金矿，但你有一整条商业街。",
+      gift:"出活速度。别人还在纠结选题，你已经在发第二条了。",
+      blind:"你会把“够用”当成“好”。",
+      pose:"每周做一件不能立刻交差的东西。" },
+    FNB:{ code:"FNB", name:"拆迁队长",
+      verdict:"别人在墙上画画，你在拆墙，理由是这面墙挡光。",
+      gift:"一眼看出规矩里哪一条是多余的。",
+      blind:"你拆的墙，有时是别人唯一的支撑。",
+      pose:"拆之前先说清楚：这堵墙原来承重什么。" },
+    FRW:{ code:"FRW", name:"跨界代购",
+      verdict:"你的灵感来自三个行业之外，但你按时交货。",
+      gift:"把远方的东西翻译成本地人能用的。",
+      blind:"你常带来别人暂时用不上的东西。",
+      pose:"每搬运一个东西，配一个本地化的例子。" },
+    FRB:{ code:"FRB", name:"外星驻地球办",
+      verdict:"你给出的答案，通常要先解释三分钟，才有人敢点头。",
+      gift:"换掉整个框架，而不是在里面找位置。",
+      blind:"你常赢在正确，输在可理解。",
+      pose:"给你的新框架配一个旧世界的入口。" },
+    PNW:{ code:"PNW", name:"老师傅",
+      verdict:"你不发明新菜，但同一道菜你能做到别人不敢比。",
+      gift:"手感和完成度：别人做三遍，你第二遍就到位。",
+      blind:"你会把“更难”当成“更好”。",
+      pose:"每季度接一个你明确不会做的活。" },
+    PNB:{ code:"PNB", name:"改水电的",
+      verdict:"你看上去什么都没动，其实承重墙已经被你换了。",
+      gift:"在所有人都以为“已经定型”的地方动手。",
+      blind:"你的改动别人看不见，所以你不被感谢。",
+      pose:"留一份“改造前后对照”给外人看。" },
+    PRW:{ code:"PRW", name:"考据癖",
+      verdict:"你每一个细节，都能追溯到一个没人查过的出处。",
+      gift:"深挖和可信度。你是全队那个不会被骗的人。",
+      blind:"你会用查资料代替做决定。",
+      pose:"给自己设一条“够了”的截止线。" },
+    PRB:{ code:"PRB", name:"慢速叛徒",
+      verdict:"你不喊口号，你只是把所有人正在用的东西，悄悄换成了另一个东西。",
+      gift:"精密地改变规则：改完之后，别人还以为没变。",
+      blind:"太慢，慢到可能被时代越过。",
+      pose:"每半年公开一次半成品。" },
+
+    __COPY:{ code:"ALL IN", name:"复印机",
+      verdict:"你在用最少的信息完成测试。这也是一种创造力，叫省电模式。",
+      gift:"决策成本极低。别人纠结一晚上的事，你三秒就过。",
+      blind:"你把“随便”伪装成“随和”。",
+      pose:"下次至少有三题，选你第一反应不喜欢的那一个。" },
+    __SELF:{ code:"+1", name:"另起一行",
+      verdict:"系统准备的所有选项，你都嫌窄。",
+      gift:"你能看见题目本身的问题，这是最稀缺的那种能力。",
+      blind:"你会因为嫌弃选项，错过本来能用的好答案。",
+      pose:"把你写的那句话留下来，一年后再看。" }
+  };
+
+  const FIELD_TIP = {
+    I:"你适合一个人开工：先做出一个丑版本，再拿去给人看。",
+    C:"你适合边说边做：把想法讲给一个具体的人听，讲到一半你会自己改。"
+  };
+
+  /* =========================================================
+     4. 状态机
+     ========================================================= */
+  const answers = new Array(Q.length).fill(null);  // {pick: idx, text?: string}
+  let cur = 0;
+  let lastResult = null;
+
+  const $ = id => document.getElementById(id);
+  const screens = { intro:$("scr-intro"), quiz:$("scr-quiz"), result:$("scr-result") };
+  function show(name){
+    Object.keys(screens).forEach(k => screens[k].classList.toggle("on", k === name));
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- 渲染一题 ---------- */
+  function renderQuestion(){
+    const q = Q[cur];
+    $("count").textContent = (cur + 1) + " / " + Q.length;
+    $("prog").style.width = ((cur) / Q.length * 100) + "%";
+    $("btn-back").style.visibility = cur === 0 ? "hidden" : "visible";
+
+    const body = $("qbody");
+    body.innerHTML = "";
+
+    const qt = document.createElement("div");
+    qt.className = "qtext";
+    qt.textContent = q.t;
+    body.appendChild(qt);
+
+    const wrap = document.createElement("div");
+    wrap.className = "opts";
+    body.appendChild(wrap);
+
+    const curAns = answers[cur];
+
+    q.o.forEach((opt, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt" + (opt.self ? " self" : "") +
+        (curAns && curAns.pick === i ? " sel" : "");
+      b.textContent = opt.t;
+      b.addEventListener("click", () => choose(i));
+      wrap.appendChild(b);
+    });
+
+    // 选了"自己写"的选项时，展开输入框
+    if (q.special && curAns && curAns.pick === 2){
+      const lastOpt = wrap.lastElementChild;
+      lastOpt.classList.add("sel");
+      const row = document.createElement("div");
+      row.className = "freerow";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.maxLength = 40;
+      input.placeholder = "一句就行，40 字以内";
+      input.value = curAns.text || "";
+      const go = document.createElement("button");
+      go.type = "button";
+      go.className = "btn";
+      go.textContent = "就用这句";
+      go.addEventListener("click", () => {
+        const v = input.value.trim();
+        answers[cur] = { pick:2, text:v };
+        advance();
+      });
+      input.addEventListener("keydown", e => { if (e.key === "Enter") go.click(); });
+      row.appendChild(input); row.appendChild(go);
+      body.appendChild(row);
+      setTimeout(() => input.focus(), 60);
+    }
+  }
+
+  function choose(i){
+    const q = Q[cur];
+    const opt = q.o[i];
+    if (opt.self && q.special){
+      answers[cur] = { pick:i, text:(answers[cur] && answers[cur].text) || "" };
+      renderQuestion();
+      return;
+    }
+    answers[cur] = { pick:i };
+    // 视觉反馈后跳下一题
+    const btns = $("qbody").querySelectorAll(".opt");
+    if (btns[i]) btns[i].classList.add("sel");
+    setTimeout(advance, 190);
+  }
+
+  function advance(){
+    if (cur < Q.length - 1){ cur++; renderQuestion(); }
+    else { finish(); }
+  }
+
+  /* =========================================================
+     5. 计分
+     ========================================================= */
+  function compute(){
+    const tally = {};
+    AXES.forEach(a => { tally[a.id] = { L:0, R:0 }; });
+
+    let posA = 0, posB = 0, total = 0, selfText = "";
+
+    answers.forEach((ans, qi) => {
+      if (!ans) return;
+      const opt = Q[qi].o[ans.pick];
+      if (!opt) return;
+      if (ans.pick === 0) { posA++; total++; }
+      else if (ans.pick === 1) { posB++; total++; }
+      if (!opt.p) {
+        if (opt.self && ans.text) selfText = ans.text;
+        return;
+      }
+      const ax = AX[Q[qi].axis];
+      tally[Q[qi].axis][opt.p === ax.L.code ? "L" : "R"] += (Q[qi].w || 1);
+    });
+
+    // 彩蛋判定（先于常规结果）
+    let egg = null;
+    if (selfText) egg = "__SELF";
+    else if (total >= 18 && (posA >= total - 2 || posB >= total - 2)) egg = "__COPY";
+
+    const lean = {};   // -1..1，正=偏左极
+    const share = {};  // 左极占比 0..1
+    AXES.forEach(a => {
+      const s = tally[a.id], sum = s.L + s.R;
+      share[a.id] = sum ? s.L / sum : .5;
+      lean[a.id] = sum ? (s.L - s.R) / sum : 0;
+    });
+
+    const code = [
+      share.eng  >= .5 ? "F" : "P",
+      share.src  >= .5 ? "N" : "R",
+      share.rule >= .5 ? "W" : "B"
+    ].join("");
+
+    return { egg, code, type:TYPES[egg || code] || TYPES.FNW, share, tally, selfText };
+  }
+
+  /* =========================================================
+     6. 雷达图
+     ========================================================= */
+  function drawRadar(ctx, cx, cy, r, share, opts){
+    opts = opts || {};
+    const n = AXES.length;
+    const ang = i => -Math.PI/2 + i * (Math.PI*2/n);
+    const dark = !!opts.dark;
+
+    ctx.save();
+    // 网格
+    for (let ring = 1; ring <= 4; ring++){
+      ctx.beginPath();
+      for (let i = 0; i < n; i++){
+        const rr = r * ring / 4;
+        const x = cx + Math.cos(ang(i)) * rr, y = cy + Math.sin(ang(i)) * rr;
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = dark ? "rgba(255,255,255,.10)" : "rgba(255,255,255,.10)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    // 轴线
+    for (let i = 0; i < n; i++){
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(ang(i))*r, cy + Math.sin(ang(i))*r);
+      ctx.strokeStyle = "rgba(255,255,255,.08)";
+      ctx.stroke();
+    }
+    // 数据面
+    ctx.beginPath();
+    for (let i = 0; i < n; i++){
+      const a = AXES[i];
+      const v = Math.abs(share[a.id] - .5) * 2;      // 0..1 偏离中心的程度
+      const rr = r * (0.16 + 0.84 * v);
+      const x = cx + Math.cos(ang(i)) * rr, y = cy + Math.sin(ang(i)) * rr;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.closePath();
+    const g = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+    g.addColorStop(0, "rgba(57,208,200,.34)");
+    g.addColorStop(1, "rgba(124,108,255,.34)");
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(124,108,255,.85)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 顶点
+    for (let i = 0; i < n; i++){
+      const a = AXES[i];
+      const v = Math.abs(share[a.id] - .5) * 2;
+      const rr = r * (0.16 + 0.84 * v);
+      const x = cx + Math.cos(ang(i)) * rr, y = cy + Math.sin(ang(i)) * rr;
+      ctx.beginPath();
+      ctx.arc(x, y, 3.2, 0, Math.PI*2);
+      ctx.fillStyle = "#39d0c8";
+      ctx.fill();
+    }
+
+    // 标签：主极名 + 占比
+    const fs = opts.fontSize || 12;
+    ctx.font = "600 " + fs + "px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+    ctx.textBaseline = "middle";
+    for (let i = 0; i < n; i++){
+      const a = AXES[i];
+      const left = share[a.id] >= .5;
+      const pole = left ? a.L : a.R;
+      const pct = Math.round(Math.max(share[a.id], 1 - share[a.id]) * 100);
+      const label = pole.name + " " + pct + "%";
+      const cap = r + (opts.labelGap || 22);
+      const x = cx + Math.cos(ang(i)) * cap;
+      const y = cy + Math.sin(ang(i)) * cap;
+      ctx.fillStyle = left ? "#39d0c8" : "#b3a8ff";
+      ctx.textAlign = Math.abs(Math.cos(ang(i))) < .2 ? "center"
+                    : (Math.cos(ang(i)) > 0 ? "left" : "right");
+      ctx.fillText(label, x, y);
+    }
+    ctx.restore();
+  }
+
+  /* =========================================================
+     7. 结果页
+     ========================================================= */
+  function finish(){
+    const res = compute();
+    lastResult = res;
+    const t = res.type;
+
+    $("r-code").textContent = t.code;
+    $("r-name").textContent = t.name;
+    $("r-verdict").textContent = t.verdict;
+    $("r-gift").textContent = t.gift;
+    $("r-blind").textContent = t.blind;
+
+    const fieldLeft = res.share.field >= .5;
+    $("r-pose").textContent = t.pose + "　" + FIELD_TIP[fieldLeft ? "I" : "C"];
+
+    // 每轴的定位说明
+    const lang = $("r-lang");
+    lang.innerHTML = "";
+    AXES.forEach(a => {
+      const left = res.share[a.id] >= .5;
+      const pole = left ? a.L : a.R;
+      const pct = Math.round(Math.max(res.share[a.id], 1 - res.share[a.id]) * 100);
+      const row = document.createElement("div");
+      const extreme = Math.abs(res.share[a.id] - .5) >= .30;
+      row.innerHTML = "<b>" + a.label + "</b><span>" + pole.name + " " + pct + "%" +
+        (extreme ? "（几乎贴边）" : "（偏 " + pole.name + "）") + "</span>";
+      lang.appendChild(row);
+    });
+
+    // 用户原话
+    const qbox = $("r-quote");
+    qbox.innerHTML = "";
+    if (res.selfText){
+      const d = document.createElement("div");
+      d.className = "quote";
+      d.innerHTML = "<span>你的原话</span>" + escapeHtml(res.selfText);
+      qbox.appendChild(d);
+    }
+
+    // 雷达
+    const cv = $("radar");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const size = 320;
+    cv.width = size * dpr; cv.height = size * dpr;
+    cv.style.width = size + "px"; cv.style.height = size + "px";
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, size, size);
+    drawRadar(ctx, size/2, size/2, 108, res.share, { fontSize:12, labelGap:24 });
+
+    $("layer").classList.remove("on");
+    show("result");
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  /* =========================================================
+     8. 结果卡（Canvas 竖版海报）
+     ========================================================= */
+  const CARD_W = 750;
+  const PAD = 64;
+
+  function wrapLines(ctx, text, font, maxW){
+    ctx.font = font;
+    const lines = [];
+    let line = "";
+    for (const ch of String(text)){
+      if (ch === "\n"){ lines.push(line); line = ""; continue; }
+      const test = line + ch;
+      if (ctx.measureText(test).width > maxW && line){
+        lines.push(line); line = ch;
+      } else { line = test; }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function buildCard(res){
+    const t = res.type;
+    const probe = document.createElement("canvas").getContext("2d");
+    const innerW = CARD_W - PAD * 2;
+    const ops = [];
+    let y = 84;
+
+    const F = (w, s) => (w + " " + s + "px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif");
+
+    ops.push({ kind:"text", text:"创造力剖面", font:F(600,22), color:"#7a7a92", y, gap:14 });
+    y += 42;
+
+    ops.push({ kind:"text", text:t.code.split("").join("　"), font:F(700,64), color:"#ffffff", y, gap:10 });
+    y += 74;
+
+    ops.push({ kind:"text", text:t.name, font:F(700,58), color:"#39d0c8", y, gap:26 });
+    y += 86;
+
+    const vLines = wrapLines(probe, t.verdict, F(500,28), innerW);
+    ops.push({ kind:"para", lines:vLines, font:F(500,28), color:"#e8e8f0", lh:44, y });
+    y += vLines.length * 44 + 30;
+
+    const radarY = y + 150;
+    ops.push({ kind:"radar", cx:CARD_W/2, cy:radarY, r:126, y });
+    y = radarY + 150 + 44;
+
+    [["天赋", t.gift], ["盲点", t.blind]].forEach(([label, text]) => {
+      ops.push({ kind:"text", text:label, font:F(600,20), color:"#6b6b7d", y, gap:10 });
+      y += 32;
+      const ls = wrapLines(probe, text, F(400,26), innerW);
+      ops.push({ kind:"para", lines:ls, font:F(400,26), color:"#c9c9d8", lh:40, y });
+      y += ls.length * 40 + 26;
+    });
+
+    if (res.selfText){
+      ops.push({ kind:"text", text:"你的原话", font:F(600,20), color:"#6b6b7d", y, gap:10 });
+      y += 32;
+      const qs = wrapLines(probe, "「" + res.selfText + "」", F(400,26), innerW).slice(0, 3);
+      ops.push({ kind:"para", lines:qs, font:F(400,26), color:"#39d0c8", lh:40, y });
+      y += qs.length * 40 + 26;
+    }
+
+    // 底部署名
+    const footY = y + 30;
+    const host = location.hostname && location.hostname !== "localhost" ? location.hostname : "";
+    ops.push({ kind:"text", text:"娱乐性自评 · 非心理测量工具" + (host ? " · " + host : ""),
+               font:F(400,20), color:"#55556b", y:footY, gap:0 });
+
+    return { ops, height: Math.max(footY + 56, 900) };
+  }
+
+  function renderCard(res){
+    const { ops, height } = buildCard(res);
+    const cv = document.createElement("canvas");
+    const dpr = 2;
+    cv.width = CARD_W * dpr;
+    cv.height = height * dpr;
+    const ctx = cv.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    // 背景
+    const bg = ctx.createLinearGradient(0, 0, CARD_W, height);
+    bg.addColorStop(0, "#0b0b10");
+    bg.addColorStop(.55, "#12101f");
+    bg.addColorStop(1, "#0b0b10");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, CARD_W, height);
+
+    const glow = ctx.createRadialGradient(CARD_W * .5, height * .34, 0, CARD_W * .5, height * .34, CARD_W * .8);
+    glow.addColorStop(0, "rgba(124,108,255,.16)");
+    glow.addColorStop(1, "rgba(124,108,255,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, CARD_W, height);
+
+    ctx.textBaseline = "alphabetic";
+    ops.forEach(op => {
+      if (op.kind === "text"){
+        ctx.font = op.font;
+        ctx.fillStyle = op.color;
+        ctx.textAlign = "left";
+        ctx.fillText(op.text, PAD, op.y);
+      } else if (op.kind === "para"){
+        ctx.font = op.font;
+        ctx.fillStyle = op.color;
+        ctx.textAlign = "left";
+        op.lines.forEach((ln, i) => ctx.fillText(ln, PAD, op.y + i * op.lh));
+      } else if (op.kind === "radar"){
+        drawRadar(ctx, op.cx, op.cy, op.r, res.share, { fontSize:22, labelGap:30, dark:true });
+      }
+    });
+
+    return cv;
+  }
+
+  /* =========================================================
+     9. 事件绑定
+     ========================================================= */
+  $("btn-start").addEventListener("click", () => {
+    cur = 0;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    renderQuestion();
+    show("quiz");
+  });
+
+  $("btn-back").addEventListener("click", () => {
+    if (cur > 0){ cur--; renderQuestion(); }
+  });
+
+  $("btn-retry").addEventListener("click", () => {
+    cur = 0;
+    for (let i = 0; i < answers.length; i++) answers[i] = null;
+    lastResult = null;
+    renderQuestion();
+    show("quiz");
+  });
+
+  $("btn-card").addEventListener("click", () => {
+    if (!lastResult) return;
+    const cv = renderCard(lastResult);
+    $("cardimg").src = cv.toDataURL("image/png");
+    $("layer").classList.add("on");
+  });
+
+  $("btn-close").addEventListener("click", () => $("layer").classList.remove("on"));
+  $("layer").addEventListener("click", e => { if (e.target.id === "layer") $("layer").classList.remove("on"); });
+
+  $("btn-copy").addEventListener("click", async () => {
+    if (!lastResult) return;
+    const t = lastResult.type;
+    const txt = "我的创造力类型：" + t.name + "（" + t.code + "）\n" +
+                "「" + t.verdict + "」\n" +
+                "盲点：" + t.blind + "\n" +
+                (location.href.split("?")[0]);
+    try {
+      await navigator.clipboard.writeText(txt);
+      $("btn-copy").textContent = "已复制";
+      setTimeout(() => { $("btn-copy").textContent = "复制文案"; }, 1600);
+    } catch (e){
+      $("btn-copy").textContent = "复制失败，请手动选";
+      setTimeout(() => { $("btn-copy").textContent = "复制文案"; }, 1600);
+    }
+  });
+
+  // 防双击缩放（iOS）
+  document.addEventListener("dblclick", e => e.preventDefault(), { passive:false });
+
+  renderQuestion();
+})();
+</script>
+</body>
+</html>
