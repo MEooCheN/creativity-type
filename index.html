@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="20 道题，测出你的创造力是哪种形状。娱乐性自评，非心理测量工具。">
+<meta name="description" content="22 道题，测出你的创造力是哪种形状。娱乐性自评，非心理测量工具。">
 <meta name="theme-color" content="#0b0b10">
 <title>你的创造力是哪种形状</title>
 <style>
@@ -70,6 +70,9 @@
   .hero em{font-style:normal;background:linear-gradient(120deg,var(--accent2),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
   .facts{display:flex;gap:18px;margin:6px 0 26px;color:var(--dim);font-size:13.5px}
   .facts b{color:var(--fg);font-weight:600}
+  .howto{display:flex;flex-direction:column;gap:11px;margin:6px 0 0;font-size:13.5px;color:var(--dim)}
+  .howto > div{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:baseline}
+  .howto b{color:#d6d6e4;font-weight:600;font-size:12.5px;letter-spacing:1px}
 
   /* ---------- quiz ---------- */
   .qtop{display:flex;align-items:center;gap:12px;margin-bottom:26px}
@@ -107,7 +110,8 @@
   .name{font-size:40px;font-weight:750;line-height:1.2;margin:0 0 16px;letter-spacing:1px}
   .verdict{font-size:19px;line-height:1.65;color:#e8e8f0;margin:0 0 8px;font-weight:500}
   .radarwrap{display:flex;justify-content:center;margin:14px 0 6px}
-  .langrid{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:6px 0 4px;font-size:13px;color:var(--dim)}
+  .langrid{display:flex;flex-direction:column;gap:5px;margin:6px 0 4px;font-size:13px;color:var(--dim)}
+  .langrid > div{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:baseline}
   .langrid b{color:var(--fg);font-weight:600;white-space:nowrap}
   .block{border-top:1px solid var(--line);padding:16px 0 2px;margin-top:6px}
   .block h3{font-size:12.5px;letter-spacing:2px;color:var(--dim2);margin:0 0 8px;font-weight:600;text-transform:uppercase}
@@ -138,11 +142,16 @@
   <section id="scr-intro" class="screen on">
     <div class="kicker">创造力剖面</div>
     <h1 class="hero">你不是<em>有没有</em>创造力，<br>你是<em>哪一种形状</em>。</h1>
-    <p class="muted">20 道题，四个维度，八个外号。<br>不测高低，只测你脑子里那台机器是怎么运转的。</p>
+    <p class="muted">22 道题，四个维度，八个外号。<br>不测高低，只测你脑子里那台机器是怎么运转的。</p>
     <div class="facts">
-      <span><b>20</b> 题</span>
+      <span><b>22</b> 题</span>
       <span><b>90</b> 秒</span>
       <span><b>8+2</b> 种结果</span>
+    </div>
+    <div class="howto">
+      <div><b>四个维度</b><span>发动机 · 取材 · 规则 · 场域</span></div>
+      <div><b>八个外号</b><span>从“便利店”到“慢速叛徒”，没有好坏</span></div>
+      <div><b>两个彩蛋</b><span>藏在你的答题方式里，测完才揭晓</span></div>
     </div>
     <div class="spacer"></div>
     <button class="btn" id="btn-start">开始</button>
@@ -164,11 +173,11 @@
     <div class="code" id="r-code"></div>
     <h2 class="name" id="r-name"></h2>
     <p class="verdict" id="r-verdict"></p>
-    <div class="radarwrap"><canvas id="radar" width="320" height="320" style="width:320px;height:320px"></canvas></div>
+    <div class="radarwrap"><canvas id="radar" width="360" height="360" style="width:360px;height:360px"></canvas></div>
     <div class="langrid" id="r-lang"></div>
     <div class="block"><h3>天赋</h3><p id="r-gift"></p></div>
     <div class="block"><h3>盲点</h3><p id="r-blind"></p></div>
-    <div class="block"><h3>创造姿势</h3><p id="r-pose"></p></div>
+    <div class="block"><h3>创造姿势</h3><p id="r-pose"></p><p id="r-field" class="muted"></p></div>
     <div id="r-quote"></div>
     <div class="acts">
       <button class="btn" id="btn-card">生成结果卡</button>
@@ -287,7 +296,15 @@
 
     { axis:"rule", w:2, t:"【情境】有人给你一道“没有标准答案”的题。你先：", o:[
       {t:"问清楚评分标准是什么", p:"W"},
-      {t:"把它当成一个可以被改写的问题", p:"B"} ]}
+      {t:"把它当成一个可以被改写的问题", p:"B"} ]},
+
+    { axis:"field", w:1, t:"脑子里冒出一个好想法，你第一反应是：", o:[
+      {t:"先自己往下想，不想被打断", p:"I"},
+      {t:"想立刻说给谁听", p:"C"} ]},
+
+    { axis:"field", w:1, t:"你觉得更好的创作状态是：", o:[
+      {t:"大段不被打扰的独处", p:"I"},
+      {t:"持续的对话和碰撞", p:"C"} ]}
   ];
 
   /* =========================================================
@@ -470,7 +487,7 @@
     // 彩蛋判定（先于常规结果）
     let egg = null;
     if (selfText) egg = "__SELF";
-    else if (total >= 18 && (posA >= total - 2 || posB >= total - 2)) egg = "__COPY";
+    else if (total >= Q.length - 2 && (posA >= total - 2 || posB >= total - 2)) egg = "__COPY";
 
     const lean = {};   // -1..1，正=偏左极
     const share = {};  // 左极占比 0..1
@@ -551,22 +568,28 @@
       ctx.fill();
     }
 
-    // 标签：主极名 + 占比
+    // 标签：主极名 + 占比。按文字实际宽度沿轴向外偏移，任何画布宽度都不会被裁。
     const fs = opts.fontSize || 12;
+    const boxW = opts.w || (r * 2 + 80);
     ctx.font = "600 " + fs + "px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
     ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
     for (let i = 0; i < n; i++){
       const a = AXES[i];
       const left = share[a.id] >= .5;
       const pole = left ? a.L : a.R;
       const pct = Math.round(Math.max(share[a.id], 1 - share[a.id]) * 100);
       const label = pole.name + " " + pct + "%";
-      const cap = r + (opts.labelGap || 22);
-      const x = cx + Math.cos(ang(i)) * cap;
-      const y = cy + Math.sin(ang(i)) * cap;
+      const tw = ctx.measureText(label).width;
+      const dx = Math.cos(ang(i)), dy = Math.sin(ang(i));
+      const sx = Math.abs(dx) > .5 ? (dx > 0 ? 1 : -1) : 0;
+      const sy = Math.abs(dy) > .5 ? (dy > 0 ? 1 : -1) : 0;
+      const offX = r + (opts.labelGap || 22) + tw / 2;
+      const offY = r + (opts.labelGap || 22);
+      let x = cx + sx * offX;
+      let y = cy + sy * offY;
+      x = Math.max(tw / 2 + 2, Math.min(x, boxW - tw / 2 - 2));
       ctx.fillStyle = left ? "#39d0c8" : "#b3a8ff";
-      ctx.textAlign = Math.abs(Math.cos(ang(i))) < .2 ? "center"
-                    : (Math.cos(ang(i)) > 0 ? "left" : "right");
       ctx.fillText(label, x, y);
     }
     ctx.restore();
@@ -587,7 +610,8 @@
     $("r-blind").textContent = t.blind;
 
     const fieldLeft = res.share.field >= .5;
-    $("r-pose").textContent = t.pose + "　" + FIELD_TIP[fieldLeft ? "I" : "C"];
+    $("r-pose").textContent = t.pose;
+    $("r-field").textContent = FIELD_TIP[fieldLeft ? "I" : "C"];
 
     // 每轴的定位说明
     const lang = $("r-lang");
@@ -616,13 +640,13 @@
     // 雷达
     const cv = $("radar");
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const size = 320;
+    const size = 360;
     cv.width = size * dpr; cv.height = size * dpr;
     cv.style.width = size + "px"; cv.style.height = size + "px";
     const ctx = cv.getContext("2d");
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, size, size);
-    drawRadar(ctx, size/2, size/2, 108, res.share, { fontSize:12, labelGap:24 });
+    drawRadar(ctx, size/2, size/2, 96, res.share, { fontSize:12, labelGap:12, w:size });
 
     $("layer").classList.remove("on");
     show("result");
@@ -658,50 +682,47 @@
     const probe = document.createElement("canvas").getContext("2d");
     const innerW = CARD_W - PAD * 2;
     const ops = [];
-    let y = 84;
-
     const F = (w, s) => (w + " " + s + "px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif");
 
-    ops.push({ kind:"text", text:"创造力剖面", font:F(600,22), color:"#7a7a92", y, gap:14 });
-    y += 42;
+    let y = 76;                                        // 当前内容的顶部
+    const ascent = size => Math.round(size * 0.80);    // 顶部到基线的近似值
 
-    ops.push({ kind:"text", text:t.code.split("").join("　"), font:F(700,64), color:"#ffffff", y, gap:10 });
-    y += 74;
-
-    ops.push({ kind:"text", text:t.name, font:F(700,58), color:"#39d0c8", y, gap:26 });
-    y += 86;
-
-    const vLines = wrapLines(probe, t.verdict, F(500,28), innerW);
-    ops.push({ kind:"para", lines:vLines, font:F(500,28), color:"#e8e8f0", lh:44, y });
-    y += vLines.length * 44 + 30;
-
-    const radarY = y + 150;
-    ops.push({ kind:"radar", cx:CARD_W/2, cy:radarY, r:126, y });
-    y = radarY + 150 + 44;
-
-    [["天赋", t.gift], ["盲点", t.blind]].forEach(([label, text]) => {
-      ops.push({ kind:"text", text:label, font:F(600,20), color:"#6b6b7d", y, gap:10 });
-      y += 32;
-      const ls = wrapLines(probe, text, F(400,26), innerW);
-      ops.push({ kind:"para", lines:ls, font:F(400,26), color:"#c9c9d8", lh:40, y });
-      y += ls.length * 40 + 26;
-    });
-
-    if (res.selfText){
-      ops.push({ kind:"text", text:"你的原话", font:F(600,20), color:"#6b6b7d", y, gap:10 });
-      y += 32;
-      const qs = wrapLines(probe, "「" + res.selfText + "」", F(400,26), innerW).slice(0, 3);
-      ops.push({ kind:"para", lines:qs, font:F(400,26), color:"#39d0c8", lh:40, y });
-      y += qs.length * 40 + 26;
+    // 一段文字：top=上间距，bottom=下间距，lh=行高
+    function para(str, size, weight, color, o){
+      o = o || {};
+      const font = F(weight, size);
+      y += (o.top || 0);
+      const lines = wrapLines(probe, str, font, innerW);
+      const lh = o.lh || Math.round(size * 1.45);
+      ops.push({ kind:"para", lines:lines, font:font, color:color, lh:lh, y:y + ascent(size) });
+      y += lines.length * lh + (o.bottom || 0);
     }
 
-    // 底部署名
-    const footY = y + 30;
-    const host = location.hostname && location.hostname !== "localhost" ? location.hostname : "";
-    ops.push({ kind:"text", text:"娱乐性自评 · 非心理测量工具" + (host ? " · " + host : ""),
-               font:F(400,20), color:"#55556b", y:footY, gap:0 });
+    para("创造力剖面", 22, 600, "#7a7a92", { bottom:26 });
+    para(t.code.length <= 4 ? t.code.split("").join("　") : t.code, 58, 700, "#ffffff", { bottom:8 });
+    para(t.name, 56, 700, "#39d0c8", { bottom:26 });
+    para(t.verdict, 28, 500, "#e8e8f0", { lh:44, bottom:34 });
 
-    return { ops, height: Math.max(footY + 56, 900) };
+    // 雷达：上下各留出标签的位置
+    const R = 118, LABEL = 34;
+    y += LABEL;
+    ops.push({ kind:"radar", cx:CARD_W/2, cy:y + R, r:R, w:CARD_W });
+    y += R * 2 + LABEL + 30;
+
+    para("天赋", 20, 600, "#6b6b7d", { bottom:6 });
+    para(t.gift, 26, 400, "#c9c9d8", { lh:40, bottom:24 });
+    para("盲点", 20, 600, "#6b6b7d", { bottom:6 });
+    para(t.blind, 26, 400, "#c9c9d8", { lh:40, bottom:20 });
+
+    if (res.selfText){
+      para("你的原话", 20, 600, "#6b6b7d", { bottom:6 });
+      para("「" + res.selfText + "」", 26, 400, "#39d0c8", { lh:40, bottom:16 });
+    }
+
+    const host = (location.hostname && location.hostname !== "localhost") ? " · " + location.hostname : "";
+    para("娱乐性自评 · 非心理测量工具" + host, 20, 400, "#55556b", { top:26 });
+
+    return { ops:ops, height: Math.round(y + 56) };
   }
 
   function renderCard(res){
@@ -740,7 +761,7 @@
         ctx.textAlign = "left";
         op.lines.forEach((ln, i) => ctx.fillText(ln, PAD, op.y + i * op.lh));
       } else if (op.kind === "radar"){
-        drawRadar(ctx, op.cx, op.cy, op.r, res.share, { fontSize:22, labelGap:30, dark:true });
+        drawRadar(ctx, op.cx, op.cy, op.r, res.share, { fontSize:22, labelGap:14, dark:true, w:op.w || CARD_W });
       }
     });
 
