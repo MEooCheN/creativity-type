@@ -12,6 +12,7 @@
 index.html              全部代码（HTML/CSS/JS 内联，单文件，零依赖）
 docs/type-system.md     8+2 个型：代号、名字、判词、天赋、盲点、姿势，每条带"决定了什么"
 docs/question-bank.md   22 道题：测哪个维度、为什么这么问、选项映射
+docs/screenshots/       封面 / 答题页 / 结果页 / 分享卡（无头浏览器实拍）
 ```
 
 ## 改文案怎么改
